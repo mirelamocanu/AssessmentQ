@@ -1,9 +1,6 @@
 package com.interviewq.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
-import lombok.Data;
 
 /**
  * Represents a full Character returned by the STAPI character endpoints.
@@ -16,9 +13,7 @@ import lombok.Data;
  *
  * @see <a href="https://stapi.co/api/v1/rest/swagger-ui.html">STAPI Swagger UI</a>
  */
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class Character {
     // ---------------------------------------------------------------
     // Required Fields

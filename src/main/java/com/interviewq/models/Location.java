@@ -1,9 +1,5 @@
 package com.interviewq.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-
 /**
  * Represents a Location returned by the STAPI location endpoints.
  *
@@ -15,9 +11,7 @@ import lombok.Data;
  *
  * @see <a href="https://stapi.co/api/v1/rest/swagger-ui.html">STAPI Swagger UI</a>
  */
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class Location {
     // ---------------------------------------------------------------
     // Required Fields
