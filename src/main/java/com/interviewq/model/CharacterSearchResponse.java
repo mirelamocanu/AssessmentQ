@@ -1,13 +1,14 @@
-package com.interviewq.models;
+package com.interviewq.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import lombok.Data;
 
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LocationSearchResponse {
-
+public class CharacterSearchResponse {
     private Page page;
-    private List<Location> locations;
+    private List<Character> characters;
 }
+

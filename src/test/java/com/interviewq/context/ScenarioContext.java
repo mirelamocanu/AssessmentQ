@@ -4,10 +4,6 @@ import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Scenario-scoped shared state.
- * Shared between step definitions via PicoContainer dependency injection.
- */
 @Setter
 @Getter
 public class ScenarioContext {

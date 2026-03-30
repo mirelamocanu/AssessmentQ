@@ -1,4 +1,4 @@
-# InterviewQ – QA Automation Exercise
+# InterviewQ –  A QA Automation Exercise
 
 A ready-to-run Cucumber + REST Assured starter project used during QA Automation interviews.
 
@@ -87,7 +87,7 @@ Useful endpoints to explore:
 | `GET` | `/animal/search` | Paginated animal search |
 | `GET` | `/species/search` | Paginated species search |
 
-Full Swagger UI: https://stapi.co/api/v2/rest/swagger-ui.html
+Full Swagger UI: https://editor.swagger.io/?url=https://stapi.co/api/v1/rest/common/download/stapi.yaml
 
 ---
 

@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.interviewq.config.ApiConfig;
 import com.interviewq.context.ScenarioContext;
-import com.interviewq.models.Character;
-import com.interviewq.models.CharacterSearchResponse;
+import com.interviewq.model.Character;
+import com.interviewq.model.CharacterSearchResponse;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

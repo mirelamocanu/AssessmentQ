@@ -1,4 +1,4 @@
-package com.interviewq.models;
+package com.interviewq.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

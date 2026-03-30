@@ -5,12 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.interviewq.config.ApiConfig;
 import com.interviewq.context.ScenarioContext;
-import com.interviewq.models.Location;
-import com.interviewq.models.LocationSearchResponse;
+import com.interviewq.model.LocationSearchResponse;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,21 +30,19 @@ public class LocationStepDefs {
         scenarioContext.setResponse(response);
     }
 
-    @And("the response contains of earth locations")
-    public void theResponseContainsOfEarthLocations() {
+    @And("the response contains {int} earth locations")
+    public void theResponseContainsOfEarthLocations(int expectedEarthlocationsCount) {
 
-        List<Location> locationsList = scenarioContext.getResponse()
+        long count =  scenarioContext.getResponse()
                 .body()
                 .as(LocationSearchResponse.class)
                 .getLocations()
                 .stream()
                 .filter(loc -> loc.getEarthlyLocation().equals(true))
-                .toList();
+                .count();
 
-        assertThat(locationsList)
-                .as("locations list")
-                .isNotEmpty();
+        assertThat(count).isEqualTo(expectedEarthlocationsCount);
 
-        log.info("Number of locations found: " + locationsList.size());
+        log.info("Number of locations found: " + count);
     }
 }
