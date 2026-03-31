@@ -23,6 +23,9 @@ public class ApiConfig {
     public static final String BASE_URL = "https://stapi.co/api/v1/rest";
 
 
+    public static final String BASE_URL_V2 = "https://stapi.co/api/v2/rest";
+
+
     // ---------------------------------------------------------------
     // Default pagination params
     // ---------------------------------------------------------------

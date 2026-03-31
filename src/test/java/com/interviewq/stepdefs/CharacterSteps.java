@@ -102,6 +102,207 @@ public class CharacterSteps {
         scenarioContext.setResponse(response);
     }
 
+     // -----------------------------------------------------------------------
+     // WHEN – filter searches (POST with form params)
+     // -----------------------------------------------------------------------
+
+     @When("I search for characters with name {string}")
+     public void iSearchForCharactersWithName(String name) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("name", name)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with gender {string}")
+     public void iSearchForCharactersWithGender(String gender) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("gender", gender)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with deceased {string}")
+     public void iSearchForCharactersWithDeceased(String deceased) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("deceased", deceased)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with hologram {string}")
+     public void iSearchForCharactersWithHologram(String hologram) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("hologram", hologram)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with fictionalCharacter {string}")
+     public void iSearchForCharactersWithFictionalCharacter(String fictionalCharacter) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("fictionalCharacter", fictionalCharacter)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with mirror {string}")
+     public void iSearchForCharactersWithMirror(String mirror) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("mirror", mirror)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with alternateReality {string}")
+     public void iSearchForCharactersWithAlternateReality(String alternateReality) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("alternateReality", alternateReality)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with gender {string} and deceased {string}")
+     public void iSearchForCharactersWithGenderAndDeceased(String gender, String deceased) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("gender", gender)
+                 .formParam("deceased", deceased)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     @When("I search for characters with mirror {string} and alternateReality {string}")
+     public void iSearchForCharactersWithMirrorAndAlternateReality(String mirror, String alternateReality) {
+         Response response = given()
+                 .contentType("application/x-www-form-urlencoded")
+                 .formParam("mirror", mirror)
+                 .formParam("alternateReality", alternateReality)
+                 .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                 .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                 .when()
+                 .post(ApiConfig.BASE_URL + ApiConfig.CHARACTER_SEARCH);
+         scenarioContext.setResponse(response);
+     }
+
+     // -----------------------------------------------------------------------
+     // THEN – assertions for each filter field
+     // -----------------------------------------------------------------------
+
+     @Then("every character name contains {string}")
+     public void everyCharacterNameContains(String namePart) {
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getName())
+                 .as("name for character uid %s", c.getUid())
+                 .containsIgnoringCase(namePart)
+         );
+     }
+
+     @Then("every character in the response has gender {string}")
+     public void everyCharacterInTheResponseHasGender(String gender) {
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getGender())
+                 .as("gender for character %s", c.getName())
+                 .isEqualToIgnoringCase(gender)
+         );
+     }
+
+     @Then("every character in the response has deceased set to {word}")
+     public void everyCharacterInTheResponseHasDeceasedSetTo(String deceased) {
+         boolean expected = Boolean.parseBoolean(deceased);
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getDeceased())
+                 .as("deceased for character %s", c.getName())
+                 .isEqualTo(expected)
+         );
+     }
+
+     @Then("every character in the response has hologram set to {word}")
+     public void everyCharacterInTheResponseHasHologramSetTo(String hologram) {
+         boolean expected = Boolean.parseBoolean(hologram);
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getHologram())
+                 .as("hologram for character %s", c.getName())
+                 .isEqualTo(expected)
+         );
+     }
+
+     @Then("every character in the response has fictionalCharacter set to {word}")
+     public void everyCharacterInTheResponseHasFictionalCharacterSetTo(String fictional) {
+         boolean expected = Boolean.parseBoolean(fictional);
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getFictionalCharacter())
+                 .as("fictionalCharacter for character %s", c.getName())
+                 .isEqualTo(expected)
+         );
+     }
+
+     @Then("every character in the response has mirror set to {word}")
+     public void everyCharacterInTheResponseHasMirrorSetTo(String mirror) {
+         boolean expected = Boolean.parseBoolean(mirror);
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getMirror())
+                 .as("mirror for character %s", c.getName())
+                 .isEqualTo(expected)
+         );
+     }
+
+     @Then("every character in the response has alternateReality set to {word}")
+     public void everyCharacterInTheResponseHasAlternateRealitySetTo(String alternateReality) {
+         boolean expected = Boolean.parseBoolean(alternateReality);
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         body.getCharacters().forEach(c ->
+             assertThat(c.getAlternateReality())
+                 .as("alternateReality for character %s", c.getName())
+                 .isEqualTo(expected)
+         );
+     }
+
+     @Then("the characters list is empty")
+     public void theCharactersListIsEmpty() {
+         CharacterSearchResponse body = scenarioContext.getResponse().as(CharacterSearchResponse.class);
+         assertThat(body.getCharacters())
+                 .as("characters list")
+                 .isEmpty();
+     }
+
     // ------------------------------------------------------------------
     // THEN
     // ------------------------------------------------------------------

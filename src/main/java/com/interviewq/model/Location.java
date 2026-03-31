@@ -55,5 +55,13 @@ public class Location {
     // ---------------------------------------------------------------
     private Boolean mirror;
     private Boolean alternateReality;
+
+       // ---------------------------------------------------------------
+    // Location Type Classification  (add alongside the existing ones)
+    // ---------------------------------------------------------------
+    private Boolean qonosLocation;       // new in v2
+    private Boolean mythologicalLocation; // new in v2
+    private Boolean restaurant;           // new in v2
+    private Boolean residence;            // new in v2
 }
 

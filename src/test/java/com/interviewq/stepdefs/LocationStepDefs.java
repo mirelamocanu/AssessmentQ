@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.interviewq.config.ApiConfig;
 import com.interviewq.context.ScenarioContext;
+import com.interviewq.model.Location;
 import com.interviewq.model.LocationSearchResponse;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -20,29 +22,257 @@ public class LocationStepDefs {
         this.scenarioContext = scenarioContext;
     }
 
+    // -----------------------------------------------------------------------
+    // WHEN – list / pagination  (GET v1)
+    // -----------------------------------------------------------------------
+
+    @When("I retrieve the list of locations")
+    public void iRetrieveTheListOfLocations() {
+        Response response = given()
+                .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                .when()
+                .get(ApiConfig.BASE_URL + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    @When("I retrieve the list of locations with page size {int}")
+    public void iRetrieveTheListOfLocationsWithPageSize(int pageSize) {
+        Response response = given()
+                .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                .queryParam("pageSize", pageSize)
+                .when()
+                .get(ApiConfig.BASE_URL + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    @When("I retrieve page {int} of locations with page size {int}")
+    public void iRetrievePageOfLocationsWithPageSize(int pageNumber, int pageSize) {
+        Response response = given()
+                .queryParam("pageNumber", pageNumber)
+                .queryParam("pageSize", pageSize)
+                .when()
+                .get(ApiConfig.BASE_URL + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    @When("I retrieve the first location from the results")
+    public void iRetrieveTheFirstLocationFromTheResults() {
+        String uid = scenarioContext.getResponse()
+                .jsonPath()
+                .getString("locations[0].uid");
+        assertThat(uid).as("Expected a UID in the first search result").isNotBlank();
+        scenarioContext.setCapturedUid(uid);
+
+        Response response = given()
+                .queryParam("uid", uid)
+                .when()
+                .get(ApiConfig.BASE_URL + ApiConfig.LOCATION);
+        scenarioContext.setResponse(response);
+    }
+
+    @When("I retrieve the location with UID {string}")
+    public void iRetrieveTheLocationWithUID(String uid) {
+        Response response = given()
+                .queryParam("uid", uid)
+                .when()
+                .get(ApiConfig.BASE_URL + ApiConfig.LOCATION);
+        scenarioContext.setResponse(response);
+    }
+
+    // -----------------------------------------------------------------------
+    // WHEN – legacy Earth search  (GET v1, kept for backward compatibility)
+    // -----------------------------------------------------------------------
+
     @When("I search for locations on Earth")
     public void iSearchForLocationsOnEarth() {
         Response response = given()
                 .queryParam("placeOfBirth", "Earth")
                 .when()
                 .get(ApiConfig.BASE_URL + ApiConfig.LOCATION_SEARCH);
-
         scenarioContext.setResponse(response);
     }
 
-    @And("the response contains {int} earth locations")
-    public void theResponseContainsOfEarthLocations(int expectedEarthlocationsCount) {
+    // -----------------------------------------------------------------------
+    // WHEN – name filter  (POST v2)
+    // -----------------------------------------------------------------------
 
-        long count =  scenarioContext.getResponse()
+    @When("I search for locations with name {string}")
+    public void iSearchForLocationsWithName(String name) {
+        Response response = given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam("name", name)
+                .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                .when()
+                .post(ApiConfig.BASE_URL_V2 + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    // -----------------------------------------------------------------------
+    // WHEN – single boolean filter  (POST v2)
+    // Handles all 26 boolean flags from the Scenario Outline
+    // -----------------------------------------------------------------------
+
+    @When("I search for locations with {word} set to {string}")
+    public void iSearchForLocationsWithFilterSetTo(String filterParam, String value) {
+        Response response = given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam(filterParam, value)
+                .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                .when()
+                .post(ApiConfig.BASE_URL_V2 + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    // -----------------------------------------------------------------------
+    // WHEN – two combined boolean filters  (POST v2)
+    // -----------------------------------------------------------------------
+
+    @When("I search for locations with {word} set to {string} and {word} set to {string}")
+    public void iSearchForLocationsWithTwoFilters(
+            String filter1, String value1, String filter2, String value2) {
+        Response response = given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam(filter1, value1)
+                .formParam(filter2, value2)
+                .queryParam("pageNumber", ApiConfig.DEFAULT_PAGE_NUMBER)
+                .queryParam("pageSize", ApiConfig.DEFAULT_PAGE_SIZE)
+                .when()
+                .post(ApiConfig.BASE_URL_V2 + ApiConfig.LOCATION_SEARCH);
+        scenarioContext.setResponse(response);
+    }
+
+    // -----------------------------------------------------------------------
+    // THEN – list / data integrity
+    // -----------------------------------------------------------------------
+
+    @And("the response list is not empty")
+    public void theResponseListIsNotEmpty() {
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        assertThat(body.getLocations()).as("locations list").isNotEmpty();
+    }
+
+    @And("each location has a non-blank name and UID")
+    public void eachLocationHasANonBlankNameAndUID() {
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        body.getLocations().forEach(loc -> {
+            assertThat(loc.getUid()).as("uid for location '%s'", loc.getName()).isNotBlank();
+            assertThat(loc.getName()).as("name for location uid %s", loc.getUid()).isNotBlank();
+        });
+    }
+
+    @And("the page metadata is valid")
+    public void thePageMetadataIsValid() {
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        assertThat(body.getPage()).as("page object").isNotNull();
+        assertThat(body.getPage().getTotalElements()).as("totalElements").isGreaterThan(0);
+        assertThat(body.getPage().getTotalPages()).as("totalPages").isGreaterThan(0);
+        assertThat(body.getPage().getNumberOfElements()).as("numberOfElements")
+                .isLessThanOrEqualTo(body.getPage().getPageSize());
+    }
+
+    @And("the result page contains at most {int} locations")
+    public void theResultPageContainsAtMostLocations(int max) {
+        int actual = scenarioContext.getResponse().jsonPath().getList("locations").size();
+        assertThat(actual).as("locations on page").isLessThanOrEqualTo(max);
+    }
+
+    @And("the location response contains a name field")
+    public void theLocationResponseContainsANameField() {
+        String name = scenarioContext.getResponse().jsonPath().getString("location.name");
+        assertThat(name).as("location.name").isNotBlank();
+    }
+
+    @And("the response body is null")
+    public void theResponseBodyIsNull() {
+        String location = scenarioContext.getResponse().jsonPath().getString("location");
+        assertThat(location).as("location body").isNull();
+    }
+
+    // -----------------------------------------------------------------------
+    // THEN – legacy Earth locations count
+    // -----------------------------------------------------------------------
+
+    @And("the response contains {int} earth locations")
+    public void theResponseContainsEarthLocations(int expectedCount) {
+        long count = scenarioContext.getResponse()
                 .body()
                 .as(LocationSearchResponse.class)
                 .getLocations()
                 .stream()
-                .filter(loc -> loc.getEarthlyLocation().equals(true))
+                .filter(loc -> Boolean.TRUE.equals(loc.getEarthlyLocation()))
                 .count();
+        assertThat(count).isEqualTo(expectedCount);
+        log.info("Number of earthly locations found: {}", count);
+    }
 
-        assertThat(count).isEqualTo(expectedEarthlocationsCount);
+    // -----------------------------------------------------------------------
+    // THEN – name filter assertion
+    // -----------------------------------------------------------------------
 
-        log.info("Number of locations found: " + count);
+    @Then("every location name contains {string}")
+    public void everyLocationNameContains(String namePart) {
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        body.getLocations().forEach(loc ->
+                assertThat(loc.getName())
+                        .as("name for location uid %s", loc.getUid())
+                        .containsIgnoringCase(namePart)
+        );
+    }
+
+    @Then("the locations list is empty")
+    public void theLocationsListIsEmpty() {
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        assertThat(body.getLocations()).as("locations list").isEmpty();
+    }
+
+    // -----------------------------------------------------------------------
+    // THEN – generic boolean field assertion
+    // One step handles all 26 boolean flags — no reflection, fully type-safe
+    // -----------------------------------------------------------------------
+
+    @Then("every location in the response has {word} set to {word}")
+    public void everyLocationInTheResponseHasFieldSetTo(String fieldName, String value) {
+        boolean expected = Boolean.parseBoolean(value);
+        LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
+        body.getLocations().forEach(loc ->
+                assertThat(getBooleanField(loc, fieldName))
+                        .as("%s for location '%s'", fieldName, loc.getName())
+                        .isEqualTo(expected)
+        );
+    }
+
+    private Boolean getBooleanField(Location loc, String fieldName) {
+        switch (fieldName) {
+            case "earthlyLocation":       return loc.getEarthlyLocation();
+            case "qonosLocation":         return loc.getQonosLocation();
+            case "fictionalLocation":     return loc.getFictionalLocation();
+            case "mythologicalLocation":  return loc.getMythologicalLocation();
+            case "religiousLocation":     return loc.getReligiousLocation();
+            case "geographicalLocation":  return loc.getGeographicalLocation();
+            case "bodyOfWater":           return loc.getBodyOfWater();
+            case "country":               return loc.getCountry();
+            case "subnationalEntity":     return loc.getSubnationalEntity();
+            case "settlement":            return loc.getSettlement();
+            case "usSettlement":          return loc.getUsSettlement();
+            case "bajoranSettlement":     return loc.getBajoranSettlement();
+            case "colony":                return loc.getColony();
+            case "landform":              return loc.getLandform();
+            case "road":                  return loc.getRoad();
+            case "structure":             return loc.getStructure();
+            case "shipyard":              return loc.getShipyard();
+            case "buildingInterior":      return loc.getBuildingInterior();
+            case "establishment":         return loc.getEstablishment();
+            case "medicalEstablishment":  return loc.getMedicalEstablishment();
+            case "ds9Establishment":      return loc.getDs9Establishment();
+            case "school":                return loc.getSchool();
+            case "restaurant":            return loc.getRestaurant();
+            case "residence":             return loc.getResidence();
+            case "mirror":                return loc.getMirror();
+            case "alternateReality":      return loc.getAlternateReality();
+            default: throw new IllegalArgumentException("Unknown Location field: " + fieldName);
+        }
     }
 }
