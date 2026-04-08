@@ -7,10 +7,14 @@ import com.interviewq.config.ApiConfig;
 import com.interviewq.context.ScenarioContext;
 import com.interviewq.model.Location;
 import com.interviewq.model.LocationSearchResponse;
+import com.interviewq.model.Page;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 
@@ -88,7 +92,7 @@ public class LocationStepDefs {
     @When("I search for locations on Earth")
     public void iSearchForLocationsOnEarth() {
         Response response = given()
-                .queryParam("placeOfBirth", "Earth")
+                .queryParam("name", "Earth")
                 .when()
                 .get(ApiConfig.BASE_URL + ApiConfig.LOCATION_SEARCH);
         scenarioContext.setResponse(response);
@@ -176,7 +180,6 @@ public class LocationStepDefs {
                             .isLessThanOrEqualTo(body.getPage().getPageSize());
 
                 });
-
     }
 
     @And("the result page contains at most {int} locations")
@@ -295,5 +298,44 @@ public class LocationStepDefs {
         assertThat(scenarioContext.getResponse().as(LocationSearchResponse.class)
                 .getPage().getTotalElements()).as("Number of total(elements) locations in response is different.")
                 .isEqualTo(noOfLocations);
+    }
+
+    @And("the page metadata indicates page number {int} and page size {int}")
+    public void thePageMetadataIndicatesPageNumberPageNumberAndPageSizePageSize(int expectedPageNumber,
+            int expectedPageSize) {
+        Page page = scenarioContext.getResponse().as(LocationSearchResponse.class)
+                .getPage();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(page.getPageNumber()).as("Page number").isEqualTo(expectedPageNumber);
+            softly.assertThat(page.getPageSize()).as("Page size").isEqualTo(expectedPageSize);
+        });
+    }
+
+    @And("the page metadata has the following values:")
+    public void thePageMetadataHasTheFollowingValues(DataTable dataTable) {
+        Page actual = scenarioContext.getResponse().as(LocationSearchResponse.class).getPage();
+        Page expectedPage = new Page();
+        List<Map<String, String>> maps = dataTable.asMaps();
+        maps.forEach(row -> {
+            expectedPage.setPageNumber(Integer.parseInt(row.get("pageNumber")));
+            expectedPage.setPageSize(Integer.parseInt(row.get("pageSize")));
+            expectedPage.setNumberOfElements(Integer.parseInt(row.get("pageSize")));
+            expectedPage.setTotalElements(Integer.parseInt(row.get("totalElements")));
+            expectedPage.setTotalPages(Integer.parseInt(row.get("totalPages")));
+            expectedPage.setFirstPage(Boolean.parseBoolean(row.get("firstPage")));
+            expectedPage.setLastPage(Boolean.parseBoolean(row.get("lastPage")));
+        });
+
+        assertThat(actual).as("Page metadata").isEqualTo(expectedPage);
+    }
+
+    @And("only {int} are earthly locations")
+    public void onlyAreEarthlyLocations(int earthlyLocationsCount) {
+        long count = scenarioContext.getResponse().as(LocationSearchResponse.class)
+                .getLocations().stream().filter(Location::getEarthlyLocation).count();
+
+        assertThat(count)
+                .as("Number of earthly locations")
+                .isEqualTo(earthlyLocationsCount);
     }
 }
