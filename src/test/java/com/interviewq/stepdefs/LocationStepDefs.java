@@ -12,6 +12,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.SoftAssertions;
 
 @Slf4j
 public class LocationStepDefs {
@@ -166,11 +167,16 @@ public class LocationStepDefs {
     @And("the page metadata is valid")
     public void thePageMetadataIsValid() {
         LocationSearchResponse body = scenarioContext.getResponse().as(LocationSearchResponse.class);
-        assertThat(body.getPage()).as("page object").isNotNull();
-        assertThat(body.getPage().getTotalElements()).as("totalElements").isGreaterThan(0);
-        assertThat(body.getPage().getTotalPages()).as("totalPages").isGreaterThan(0);
-        assertThat(body.getPage().getNumberOfElements()).as("numberOfElements")
-                .isLessThanOrEqualTo(body.getPage().getPageSize());
+        SoftAssertions.assertSoftly(
+                softly -> {
+                    softly.assertThat(body.getPage()).as("page object").isNotNull();
+                    softly.assertThat(body.getPage().getTotalElements()).as("totalElements").isGreaterThan(0);
+                    softly.assertThat(body.getPage().getTotalPages()).as("totalPages").isGreaterThan(0);
+                    softly.assertThat(body.getPage().getNumberOfElements()).as("numberOfElements")
+                            .isLessThanOrEqualTo(body.getPage().getPageSize());
+
+                });
+
     }
 
     @And("the result page contains at most {int} locations")
@@ -245,34 +251,49 @@ public class LocationStepDefs {
     }
 
     private Boolean getBooleanField(Location loc, String fieldName) {
-        switch (fieldName) {
-            case "earthlyLocation":       return loc.getEarthlyLocation();
-            case "qonosLocation":         return loc.getQonosLocation();
-            case "fictionalLocation":     return loc.getFictionalLocation();
-            case "mythologicalLocation":  return loc.getMythologicalLocation();
-            case "religiousLocation":     return loc.getReligiousLocation();
-            case "geographicalLocation":  return loc.getGeographicalLocation();
-            case "bodyOfWater":           return loc.getBodyOfWater();
-            case "country":               return loc.getCountry();
-            case "subnationalEntity":     return loc.getSubnationalEntity();
-            case "settlement":            return loc.getSettlement();
-            case "usSettlement":          return loc.getUsSettlement();
-            case "bajoranSettlement":     return loc.getBajoranSettlement();
-            case "colony":                return loc.getColony();
-            case "landform":              return loc.getLandform();
-            case "road":                  return loc.getRoad();
-            case "structure":             return loc.getStructure();
-            case "shipyard":              return loc.getShipyard();
-            case "buildingInterior":      return loc.getBuildingInterior();
-            case "establishment":         return loc.getEstablishment();
-            case "medicalEstablishment":  return loc.getMedicalEstablishment();
-            case "ds9Establishment":      return loc.getDs9Establishment();
-            case "school":                return loc.getSchool();
-            case "restaurant":            return loc.getRestaurant();
-            case "residence":             return loc.getResidence();
-            case "mirror":                return loc.getMirror();
-            case "alternateReality":      return loc.getAlternateReality();
-            default: throw new IllegalArgumentException("Unknown Location field: " + fieldName);
-        }
+        return switch (fieldName) {
+            case "earthlyLocation" -> loc.getEarthlyLocation();
+            case "qonosLocation" -> loc.getQonosLocation();
+            case "fictionalLocation" -> loc.getFictionalLocation();
+            case "mythologicalLocation" -> loc.getMythologicalLocation();
+            case "religiousLocation" -> loc.getReligiousLocation();
+            case "geographicalLocation" -> loc.getGeographicalLocation();
+            case "bodyOfWater" -> loc.getBodyOfWater();
+            case "country" -> loc.getCountry();
+            case "subnationalEntity" -> loc.getSubnationalEntity();
+            case "settlement" -> loc.getSettlement();
+            case "usSettlement" -> loc.getUsSettlement();
+            case "bajoranSettlement" -> loc.getBajoranSettlement();
+            case "colony" -> loc.getColony();
+            case "landform" -> loc.getLandform();
+            case "road" -> loc.getRoad();
+            case "structure" -> loc.getStructure();
+            case "shipyard" -> loc.getShipyard();
+            case "buildingInterior" -> loc.getBuildingInterior();
+            case "establishment" -> loc.getEstablishment();
+            case "medicalEstablishment" -> loc.getMedicalEstablishment();
+            case "ds9Establishment" -> loc.getDs9Establishment();
+            case "school" -> loc.getSchool();
+            case "restaurant" -> loc.getRestaurant();
+            case "residence" -> loc.getResidence();
+            case "mirror" -> loc.getMirror();
+            case "alternateReality" -> loc.getAlternateReality();
+            default -> throw new IllegalArgumentException("Unknown Location field: " + fieldName);
+        };
+    }
+
+    @And("there are {int} locations in the response")
+    public void thereAreLocationsInTheResponse(int noOfLocations) {
+        assertThat(scenarioContext.getResponse().as(LocationSearchResponse.class)
+                .getLocations().size())
+                .as("Number of locations in response is different.")
+                .isEqualTo(noOfLocations);
+    }
+
+    @And("the number of locations is equal to {int}")
+    public void theNumberOfLocationsIsEqualToNoOfLocations(int noOfLocations) {
+        assertThat(scenarioContext.getResponse().as(LocationSearchResponse.class)
+                .getPage().getTotalElements()).as("Number of total(elements) locations in response is different.")
+                .isEqualTo(noOfLocations);
     }
 }

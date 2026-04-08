@@ -123,6 +123,7 @@ Feature: Locations endpoint
     Then the response status code is 200
     And  the response list is not empty
     And  every location name contains "Earth"
+    And there are 8 locations in the response
 
   @wip
   Scenario: Search for a location name that does not exist returns an empty list
@@ -139,35 +140,16 @@ Feature: Locations endpoint
     Then the response status code is 200
     And  the response list is not empty
     And  every location in the response has <filterParam> set to true
+    And the number of locations is equal to <noOfLocations>
 
     Examples:
-      | filterParam           |
-      | earthlyLocation       |
-      | qonosLocation         |
-      | fictionalLocation     |
-      | mythologicalLocation  |
-      | religiousLocation     |
-      | geographicalLocation  |
-      | bodyOfWater           |
-      | country               |
-      | subnationalEntity     |
-      | settlement            |
-      | usSettlement          |
-      | bajoranSettlement     |
-      | colony                |
-      | landform              |
-      | road                  |
-      | structure             |
-      | shipyard              |
-      | buildingInterior      |
-      | establishment         |
-      | medicalEstablishment  |
-      | ds9Establishment      |
-      | school                |
-      | restaurant            |
-      | residence             |
-      | mirror                |
-      | alternateReality      |
+      | filterParam          | noOfLocations |
+      | earthlyLocation      | 1102          |
+      | qonosLocation        | 43            |
+      | fictionalLocation    | 70            |
+      | geographicalLocation | 959           |
+      | country              | 70            |
+      | alternateReality     | 84            |
 
   # -----------------------------------------------------------------------
   # Earth locations — legacy GET-based step kept for backward compatibility
