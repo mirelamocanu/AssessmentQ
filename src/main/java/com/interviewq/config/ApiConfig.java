@@ -27,7 +27,7 @@ public class ApiConfig {
     // Default pagination params
     // ---------------------------------------------------------------
     public static final int DEFAULT_PAGE_NUMBER  = 0;
-    public static final int DEFAULT_PAGE_SIZE    = 20;
+    public static final int DEFAULT_PAGE_SIZE = 50;
 
     // ---------------------------------------------------------------
     // Characters & Beings
