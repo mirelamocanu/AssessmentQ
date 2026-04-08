@@ -1,5 +1,9 @@
 package com.interviewq.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
+
 /**
  * Represents the pagination metadata returned by every STAPI list/search endpoint.
  *
@@ -16,7 +20,9 @@ package com.interviewq.models;
  * }
  * </pre>
  */
-
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Page {
     private int pageNumber;
     private int pageSize;
