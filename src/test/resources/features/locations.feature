@@ -103,7 +103,7 @@ Feature: Locations endpoint
     When I search for locations on Earth
     Then the response status code is 200
     And  the response contains 32 earth locations
-#    And every location in the response has earthlyLocation set to true
+    And every location in the response has earthlyLocation set to true
 
   # -----------------------------------------------------------------------
   # combined filters  (POST v2)
@@ -123,7 +123,7 @@ Feature: Locations endpoint
     And  every location in the response has earthlyLocation set to true
     And  every location in the response has settlement set to true
 
-  Scenario:Medical establishments are flagged as both establishments and medical
+  Scenario: Medical establishments are flagged as both establishments and medical
     When I search for locations with establishment set to "true" and medicalEstablishment set to "true"
     Then the response status code is 200
     And  the response list is not empty

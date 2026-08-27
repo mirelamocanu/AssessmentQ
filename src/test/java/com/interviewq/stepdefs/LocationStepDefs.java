@@ -211,7 +211,7 @@ public class LocationStepDefs {
                 .as(LocationSearchResponse.class)
                 .getLocations()
                 .stream()
-                .filter(loc -> Boolean.TRUE.equals(loc.getEarthlyLocation()))
+                .filter(Location::getEarthlyLocation)
                 .count();
         assertThat(count).isEqualTo(expectedCount);
         log.info("Number of earthly locations found: {}", count);
